@@ -49,17 +49,30 @@ $scrf = PAGE_FULL;
 if (! array_key_exists("records_to_delete_textarea", $_POST)) {
 // Present the form
 
-if (! array_key_exists("pid", $_GET) || ! $_GET["pid"]) {
+if (! array_key_exists("pid", $_GET) or ! ($proj_id = $_GET["pid"])) {
 	exit("<b>Missing project number</b>. Make sure your URL appends \"<tt>?pid=123</tt>\" where <i>123</i> is your project number.");
 }
-
-$proj_id = $_GET["pid"];
 $scrf .= "?pid=" . $proj_id;
+
+if (! SUPER_USER) {
+	// Get array of user privileges for a single user in project (will have username as array key)
+	$this_user = USERID;
+	$rights = REDCap::getUserRights($this_user);
+
+	// If $rights returns NULL, then user does not have access to this project
+	if (empty($this_user) or empty($rights)) {
+		exit("User $this_user does NOT have access to this project.");
+	}
+
+	// Check if user can delete records
+	if (! $rights[$this_user]['record_delete']) {
+		exit("User $this_user does NOT have permission to delete records from this project.");
+	}
+}
+
+// echo "<p>The project is $proj_id.</p>"
 ?>
 
-<!--
-<?php echo "<p>The project is $proj_id.</p>" ?>
--->
 <p>Please paste in a list record numbers to delete, one per-line or separated by spaces. </p>
 <p>Note that there is <i>no</i> confirmation of deletion!  Once you click the DELETE RECORDS button below your supplied records will be <b>permanently deleted</b> from this project, so please double-check your list before proceeding. </p>
 <form action="
