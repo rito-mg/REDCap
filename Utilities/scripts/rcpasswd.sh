@@ -64,7 +64,7 @@ if ! which "sha512sum" > /dev/null ; then
 	exit 1
 fi
 
-if [ ! -r "$my_redcap_cnf" ] ; then
+if [ -z "$redcap_dbuser" ] && [ ! -r "$my_redcap_cnf" ] ; then
 	cannot_access_redcap_database 
 fi
 
